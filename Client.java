@@ -2,30 +2,55 @@ import java.io.*;
 import java.net.*;
 
 public class Client {
+    // default ds-sim port
     final static int port = 50000;
+    // declare a socket
+    private static Socket socket;
+    // declare input and output streams
+    private static DataOutputStream output;
+    private static BufferedReader input;
     
-    public static void main(String[] argv) {
+    private static void receiveMsg() {
         try {
-            Socket socket = new Socket("localhost", Client.port);
-            DataOutputStream output = new DataOutputStream(socket.getOutputStream());
-            output.write(("HELO\n").getBytes());
-            output.flush();
-            
-            BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             System.out.println(input.readLine());
-            
-            output.write(("AUTH user\n").getBytes());
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }
+    
+    private static void sendMsg(String msg) {
+        try {
+            output.write(msg.getBytes());
             output.flush();
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }   
+    
+    public static void main(String argv[]) {
+        try {
+            // Initialise a socket
+            socket = new Socket("localhost", Client.port);
             
-            System.out.println(input.readLine());
+            // Initialise input and output streams
+            output = new DataOutputStream(socket.getOutputStream());
+            input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             
-            output.write(("REDY user\n").getBytes());
-            output.flush();
+            // Handshake
+            sendMsg("HELO\n");
             
-            System.out.println(input.readLine());
+            receiveMsg();
             
-            output.write(("QUIT user\n").getBytes());
-            output.flush();
+            sendMsg("AUTH user\n");
+            
+            receiveMsg();
+            
+            sendMsg("REDY\n");
+            
+            receiveMsg();
+            
+            // Quit
+            sendMsg("QUIT\n");
             
             output.close();
             socket.close();
