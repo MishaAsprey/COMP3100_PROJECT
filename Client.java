@@ -2,6 +2,8 @@ import java.io.*;
 import java.net.*;
 
 public class Client {
+    // identify current user
+    final static String username = System.getProperty("user.name");
     // default ds-sim port
     final static int port = 50000;
     // declare a socket
@@ -30,6 +32,52 @@ public class Client {
         }
     }
     
+    private static String findLargestServers(String[] servers) {
+        int EOA = servers.length-1; // End of Array
+        String lastElement = servers[EOA];
+        String largestServer = "";
+        for (int i = 0; i < lastElement.length(); i++) {
+            if (lastElement.charAt(i) != 32) {
+                largestServer += lastElement.charAt(i);
+            } else {
+                return largestServer;
+            }
+        }
+        return "ERROR";
+    }
+    
+    private static int findLastLargestServer(String lastServer, String serverType) {
+        String serverID = "";
+        for (int i = serverType.length() + 1; i <= lastServer.length(); i++) {
+            if (lastServer.charAt(i) >= 48 && lastServer.charAt(i) <= 57) {
+                serverID += lastServer.charAt(i);
+            } else {
+                return Integer.parseInt(serverID);
+            }
+        }
+        return -1;
+    }
+    
+    private static int findJobID(String jobStr) {
+        String jobID = "";
+        int counter = 0;
+        
+        for (int i = ("JOBN").length()+1; i < jobStr.length(); i++) {
+            if (jobStr.charAt(i) == 32) {
+                counter++;
+                i++;
+            }
+            if (counter == 1) {
+                jobID += jobStr.charAt(i);
+            } else if (counter >= 2) {
+                return Integer.parseInt(jobID);
+            }
+        }
+        return -1;
+    }
+        
+            
+    
     public static void main(String argv[]) {
         try {
             // Initialise a socket
@@ -44,13 +92,13 @@ public class Client {
             
             receiveMsg();
             
-            sendMsg("AUTH user\n");
+            sendMsg("AUTH " + Client.username + "\n");
             
             receiveMsg();
             
             sendMsg("REDY\n");
             
-            receiveMsg();
+            String temp = receiveMsg();
             
             sendMsg("GETS All\n");
             String dataMsg = receiveMsg();
@@ -71,38 +119,59 @@ public class Client {
                 
             int numOfServers = Integer.parseInt(num);
             
-            String[] msgs = new String[numOfServers];
             String[] servers = new String[numOfServers];
             System.out.println(numOfServers);
             for (int i = 0; i < numOfServers; i++) {
-                msgs[i] = input.readLine();
+                servers[i] = input.readLine();
             }
             for (int i = 0; i < numOfServers; i++) {
-                System.out.println(msgs[i]);
+                System.out.println(servers[i]);
             }
+            
+            //System.out.println(findLargestServers(servers));
+            
+            String largestServer = findLargestServers(servers);
+            int lastServer = findLastLargestServer(servers[servers.length-1], largestServer);
+            System.out.println(largestServer);
+            System.out.println(lastServer);
             
             // end // create a server array
             
             sendMsg("OK\n");
-//            int k = 0;
-//            while (k <= 10) {//!receiveMsg().equals("NONE\n")) {
-//                for (int i = numOfServers, j = 0; i >= 0; i--, j++) {
-//                   sendMsg("REDY\n");
-//                    sendMsg("SCHD " + j + " joon 0\n");
-//                    receiveMsg();
-//                    k++;
-//                }   
-//            }
-            int j = 0;
-            while (j <= 20) {//!receiveMsg().equals("NONE\n")) {
-                for (int i = numOfServers; i >= 2; i--) {
-                    sendMsg("REDY\n");
-                    sendMsg("SCHD " + j + " joon 0\n");
-                    if (receiveMsg().contains("JCPL")) { break; }
-                    j++;
-                }
-                if (receiveMsg().contains("JCPL")) { break; }
+            System.out.println(receiveMsg());
+            
+            sendMsg("SCHD " + findJobID(temp) + " " + largestServer + " " + 0 + "\n");
+            receiveMsg();
+
+            //int j = 0;
+            int x = 1;
+            if (x > lastServer) { x = 0; }
+            String lastMsg = "";
+            //String temp = "";
+            while (!temp.equals("NONE")) {
+                sendMsg("REDY\n");
+                temp = receiveMsg();
+                if (temp.toLowerCase().contains(("JCPL").toLowerCase())) { continue; }
+                if (temp.toLowerCase().contains(("NONE").toLowerCase())) { break; }
+                //System.out.println("TEST: " + temp);
+                int j = findJobID(temp);
+                System.out.println(findJobID(temp));
+                sendMsg("SCHD " + j + " " + largestServer + " " + x + "\n");
+                lastMsg = receiveMsg();
+                System.out.println(findJobID(lastMsg));
+                //j++;
+                x++;
+                if (x > lastServer) { x = 0; }
             }
+            
+            //while (!temp.equals("NONE")) {
+             //   sendMsg("SCHD " + j + " " + largestServer + " " + x + "\n");
+             //   receiveMsg();
+              //  sendMsg("REDY\n");
+              //  while 
+            
+                
+            //sendMsg("REDY\n");
                 
                 
             
