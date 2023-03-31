@@ -32,7 +32,7 @@ public class Client {
         }
     }
     
-    private static String findLargestServers(String[] servers) {
+    /*private static String findLargestServers(String[] servers) {
         int EOA = servers.length-1; // End of Array
         String lastElement = servers[EOA];
         String largestServer = "";
@@ -44,7 +44,41 @@ public class Client {
             }
         }
         return "ERROR";
+    }*/
+    
+    private static String findLargestServers(String[] servers) {
+        int CPUcores = 0;
+        for (int i = 0; i < servers.length; i++) {
+            int currServerCores = getServerCPU(servers[i]);
+            if (currServerCores > CPUcores) {
+                CPUcores = currServerCores;
+            }
+        }
+        String firstLargestType = "";
+        for (int i = 0; i < servers.length; i++) {
+            int currServerCores = getServerCPU(servers[i]);
+            if (currServerCores == CPUcores) {
+                firstLargestType = servers[i];
+                break;
+            }
+        }
+        System.out.println("CHECKPOINT");
+        return getServerName(firstLargestType);
     }
+    
+    private static String getServerName(String serverStr) {
+        String largestServer = "";
+        for (int i = 0; i < serverStr.length(); i++) {
+            if (serverStr.charAt(i) != 32) {
+                largestServer += serverStr.charAt(i);
+            } else {
+                return largestServer;
+            }
+        }
+        return "ERROR";
+    }
+        
+            
     // new
     private static int getServerCPU(String serverStr) {
         String cores = "";
@@ -64,7 +98,17 @@ public class Client {
         return -1;
     }
     
-    private static int findLastLargestServer(String lastServer, String serverType) {
+    private static int findLastLargestServer(String[] servers, String serverType) {
+        String lastServer = "";
+        
+        for (int i = servers.length-1; i >= 0; i--) {
+            if (getServerName(servers[i]).equals(serverType)) {
+                lastServer = servers[i];
+                break;
+            }
+        }
+    
+    
         String serverID = "";
         for (int i = serverType.length() + 1; i <= lastServer.length(); i++) {
             if (lastServer.charAt(i) >= 48 && lastServer.charAt(i) <= 57) {
@@ -155,7 +199,9 @@ public class Client {
             //System.out.println(findLargestServers(servers));
             
             String largestServer = findLargestServers(servers);
-            int lastServer = findLastLargestServer(servers[servers.length-1], largestServer);
+            System.out.println(largestServer + "\n");
+            int lastServer = findLastLargestServer(servers, largestServer);
+            System.out.println("C2\n");
             System.out.println(largestServer);
             System.out.println(lastServer);
             
