@@ -45,6 +45,24 @@ public class Client {
         }
         return "ERROR";
     }
+    // new
+    private static int getServerCPU(String serverStr) {
+        String cores = "";
+        int startRecording = 0;
+        for (int i = 0; i < serverStr.length(); i++) {
+            if (serverStr.charAt(i) == 32) {
+                startRecording++;
+                if (startRecording >= 5) {
+                    return Integer.parseInt(cores);
+                }
+                if (startRecording == 4) { i++; }
+            }
+            if (startRecording == 4) {
+                cores += serverStr.charAt(i);
+            }
+        }
+        return -1;
+    }
     
     private static int findLastLargestServer(String lastServer, String serverType) {
         String serverID = "";
@@ -127,6 +145,12 @@ public class Client {
             for (int i = 0; i < numOfServers; i++) {
                 System.out.println(servers[i]);
             }
+            
+            //
+            for (int i = 0; i < servers.length; i++) {
+                System.out.println(getServerCPU(servers[i]));
+            }
+            //
             
             //System.out.println(findLargestServers(servers));
             
