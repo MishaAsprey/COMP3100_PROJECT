@@ -11,6 +11,20 @@ public class Client {
     // declare input and output streams
     private static DataOutputStream output;
     private static BufferedReader input;
+    // numeric values of ASCII characters
+    private enum ASCII {
+        ZERO(48),
+        NINE(57),
+        SPACE(32);
+        
+        private final int value;
+        
+        ASCII(int value) {
+            this.value = value;
+        }
+        
+        public int getValue() { return value; }
+    }
     
     private static String receiveMsg() {
         try {
@@ -31,20 +45,6 @@ public class Client {
             System.out.println(e);
         }
     }
-    
-    /*private static String findLargestServers(String[] servers) {
-        int EOA = servers.length-1; // End of Array
-        String lastElement = servers[EOA];
-        String largestServer = "";
-        for (int i = 0; i < lastElement.length(); i++) {
-            if (lastElement.charAt(i) != 32) {
-                largestServer += lastElement.charAt(i);
-            } else {
-                return largestServer;
-            }
-        }
-        return "ERROR";
-    }*/
     
     private static String findLargestServers(String[] servers) {
         int CPUcores = 0;
@@ -69,7 +69,7 @@ public class Client {
     private static String getServerName(String serverStr) {
         String largestServer = "";
         for (int i = 0; i < serverStr.length(); i++) {
-            if (serverStr.charAt(i) != 32) {
+            if (serverStr.charAt(i) != ASCII.SPACE.getValue()) {
                 largestServer += serverStr.charAt(i);
             } else {
                 return largestServer;
@@ -77,14 +77,12 @@ public class Client {
         }
         return "ERROR";
     }
-        
-            
-    // new
+    
     private static int getServerCPU(String serverStr) {
         String cores = "";
         int startRecording = 0;
         for (int i = 0; i < serverStr.length(); i++) {
-            if (serverStr.charAt(i) == 32) {
+            if (serverStr.charAt(i) == ASCII.SPACE.getValue()) {
                 startRecording++;
                 if (startRecording >= 5) {
                     return Integer.parseInt(cores);
@@ -111,7 +109,7 @@ public class Client {
     
         String serverID = "";
         for (int i = serverType.length() + 1; i <= lastServer.length(); i++) {
-            if (lastServer.charAt(i) >= 48 && lastServer.charAt(i) <= 57) {
+            if (lastServer.charAt(i) >= ASCII.ZERO.getValue() && lastServer.charAt(i) <= ASCII.NINE.getValue()) {
                 serverID += lastServer.charAt(i);
             } else {
                 return Integer.parseInt(serverID);
@@ -125,7 +123,7 @@ public class Client {
         int counter = 0;
         
         for (int i = ("JOBN").length()+1; i < jobStr.length(); i++) {
-            if (jobStr.charAt(i) == 32) {
+            if (jobStr.charAt(i) == ASCII.SPACE.getValue()) {
                 counter++;
                 i++;
             }
@@ -171,9 +169,9 @@ public class Client {
             String num = "";
             int counter = 0;
             for (int i = 0; i < dataMsg.length(); i++) {
-                if (dataMsg.charAt(i) >= 48 && dataMsg.charAt(i) <= 57) {
+                if (dataMsg.charAt(i) >= ASCII.ZERO.getValue() && dataMsg.charAt(i) <= ASCII.NINE.getValue()) {
                     num += dataMsg.charAt(i);
-                } else if (dataMsg.charAt(i) == 32) {
+                } else if (dataMsg.charAt(i) == ASCII.SPACE.getValue()) {
                     counter++;
                     if (counter >= 2) { break; }
                 }
@@ -190,14 +188,6 @@ public class Client {
                 System.out.println(servers[i]);
             }
             
-            //
-            for (int i = 0; i < servers.length; i++) {
-                System.out.println(getServerCPU(servers[i]));
-            }
-            //
-            
-            //System.out.println(findLargestServers(servers));
-            
             String largestServer = findLargestServers(servers);
             System.out.println(largestServer + "\n");
             int lastServer = findLastLargestServer(servers, largestServer);
@@ -205,48 +195,33 @@ public class Client {
             System.out.println(largestServer);
             System.out.println(lastServer);
             
-            // end // create a server array
             
             sendMsg("OK\n");
             System.out.println(receiveMsg());
             
+            // schedule the first job
+            
             sendMsg("SCHD " + findJobID(temp) + " " + largestServer + " " + 0 + "\n");
             receiveMsg();
 
-            //int j = 0;
+            // main loop to schedule jobs until there are no jobs left
+
             int x = 1;
             if (x > lastServer) { x = 0; }
             String lastMsg = "";
-            //String temp = "";
             while (!temp.equals("NONE")) {
                 sendMsg("REDY\n");
                 temp = receiveMsg();
                 if (temp.toLowerCase().contains(("JCPL").toLowerCase())) { continue; }
                 if (temp.toLowerCase().contains(("NONE").toLowerCase())) { break; }
-                //System.out.println("TEST: " + temp);
                 int j = findJobID(temp);
                 System.out.println(findJobID(temp));
                 sendMsg("SCHD " + j + " " + largestServer + " " + x + "\n");
                 lastMsg = receiveMsg();
                 System.out.println(findJobID(lastMsg));
-                //j++;
                 x++;
                 if (x > lastServer) { x = 0; }
             }
-            
-            //while (!temp.equals("NONE")) {
-             //   sendMsg("SCHD " + j + " " + largestServer + " " + x + "\n");
-             //   receiveMsg();
-              //  sendMsg("REDY\n");
-              //  while 
-            
-                
-            //sendMsg("REDY\n");
-                
-                
-            
-            //sendMsg("SCHD 0 xlarge 0\n");
-            //receiveMsg();
             
             // Quit
             sendMsg("QUIT\n");
